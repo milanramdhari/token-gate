@@ -8,23 +8,24 @@ datasource db {
 }
 
 model User {
-  id                 Int                  @id @default(autoincrement())
-  email              String               @unique
+  id                 Int                 @id @default(autoincrement())
+  email              String              @unique
   password           String
-  credits            Int                  @default(0)
-  onrampTransactions onrampTransactions[]
+  credits            Int                 @default(0)
+  onrampTransactions OnrampTransaction[]
   conversations      Conversation[]
   apiKeys            ApiKey[]
 }
 
 model ApiKey {
-  id       Int     @id @default(autoincrement())
-  userId   Int
-  name     String
-  apiKey   String
-  disables Boolean @default(false)
-  deleted  Boolean @default(false)
-  user     User    @relation(fields: [userId], references: [id])
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  name          String
+  apiKey        String
+  disables      Boolean        @default(false)
+  deleted       Boolean        @default(false)
+  user          User           @relation(fields: [userId], references: [id])
+  conversations Conversation[]
 }
 
 model Company {
@@ -35,10 +36,51 @@ model Company {
 }
 
 model Model {
-  id        Int     @id @default(autoincrement())
-  name      String
-  slug      String  @unique
-  companyID Int
-  company   Company @relation(fields: [companyId], references: [id])
-  companyId Int
+  id                    Int                    @id @default(autoincrement())
+  name                  String
+  slug                  String                 @unique
+  companyID             Int
+  company               Company                @relation(fields: [companyId], references: [id])
+  companyId             Int
+  modelProviderMappings ModelProviderMapping[]
+}
+
+model Provider {
+  id                    Int                    @id @default(autoincrement())
+  name                  String
+  website               String
+  modelProviderMappings ModelProviderMapping[]
+}
+
+model ModelProviderMapping {
+  id              Int            @id @default(autoincrement())
+  modelId         Int
+  providerId      Int
+  inputTokenCost  Int
+  outputTokenCost Int
+  model           Model          @relation(fields: [modelId], references: [id])
+  provider        Provider       @relation(fields: [providerId], references: [id])
+  conversation    Conversation[]
+}
+
+model Conversation {
+  id                     Int                  @id @default(autoincrement())
+  userId                 Int
+  apiKeyId               Int
+  modelProviderMappingId Int
+  input                  String
+  output                 String
+  inputTokenCount        Int
+  outputTokenCount       Int
+  user                   User                 @relation(fields: [userId], references: [id])
+  apiKey                 ApiKey               @relation(fields: [apiKeyId], references: [id])
+  modelProviderMapping   ModelProviderMapping @relation(fields: [modelProviderMappingId], references: [id])
+}
+
+model OnrampTransaction {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  amount Int
+  status String
+  user   User   @relation(fields: [userId], references: [id])
 }
