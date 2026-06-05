@@ -3,8 +3,12 @@ import { AuthModel } from "./model";
 import { AuthService } from "./service";
 import { jwt } from "@elysiajs/jwt";
 
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is not set. Add it to your .env file.");
+}
+
 export const auth = new Elysia({ prefix: "/auth" })
-  .use(jwt({ name: "JWTNamespace", secret: process.env.JWT_SECRET! }))
+  .use(jwt({ name: "JWTNamespace", secret: process.env.JWT_SECRET }))
   .post(
     "/signup",
     async ({ body, status, JWTNamespace, cookie: { auth } }) => {
