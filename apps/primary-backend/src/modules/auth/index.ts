@@ -5,9 +5,14 @@ import { AuthService } from "./service";
 export const auth = new Elysia({ prefix: "/auth" })
   .post(
     "/signup",
-    async ({ body }) => {
-      const id = await AuthService.signUp(body.email, body.password);
-      return { id: id };
+    async ({ body, status }) => {
+      try {
+        const id = await AuthService.signUp(body.email, body.password);
+        return { id };
+      } catch (error) {
+        console.log(error);
+        return status(400, { message: "Invalid email or password" });
+      }
     },
     {
       body: AuthModel.signUpSchema,
@@ -18,9 +23,20 @@ export const auth = new Elysia({ prefix: "/auth" })
     },
   )
   .post(
-    "/signin", async ({ body }) => {
-        const token = await AuthService.signIn(body.email, body.password);
-        return { token };
+    "/signin",
+    async ({ body, status, cookie: { auth } }) => {
+      const result = await AuthService.signIn(body.email, body.password);
+      if (!result.correctCredentials) {
+        return status(400, { message: "Invalid email or password" });
+      }
+      auth.set({
+        value: result.userId,
+        httpOnly: true,
+        secure: true,
+        maxAge: 86400,
+        sameSite: "strict",
+      });
+      return status(200, { token: result.userId });
     },
     {
       body: AuthModel.signInSchema,

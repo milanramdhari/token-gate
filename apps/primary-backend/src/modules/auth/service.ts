@@ -1,8 +1,44 @@
+import { prisma } from "db";
+
+type SignInResult =
+  | { correctCredentials: false }
+  | { correctCredentials: true; userId: string };
+
 export abstract class AuthService {
-  static async signUp(username: string, password: string): Promise<string> {
-    return "1234567890";
+  static async signUp(email: string, password: string): Promise<string> {
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    if (existingUser) {
+      throw new Error("User already exists");
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        email: email,
+        password: await Bun.password.hash(password),
+      },
+    });
+    return user.id.toString();
   }
-  static async signIn(username: string, password: string): Promise<string> {
-    return "test token";
+
+  static async signIn(email: string, password: string): Promise<SignInResult> {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (!(await Bun.password.verify(password, user.password))) {
+      return { correctCredentials: false };
+    }
+
+    return { correctCredentials: true, userId: user.id.toString() };
   }
 }
