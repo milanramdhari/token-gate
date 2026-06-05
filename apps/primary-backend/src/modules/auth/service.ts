@@ -25,14 +25,12 @@ export abstract class AuthService {
   }
 
   static async signIn(email: string, password: string): Promise<SignInResult> {
-    const user = await prisma.user.findFirst({
-      where: {
-        email: email,
-      },
+    const user = await prisma.user.findUnique({
+      where: { email },
     });
 
     if (!user) {
-      throw new Error("User not found");
+      return { correctCredentials: false };
     }
 
     if (!(await Bun.password.verify(password, user.password))) {
