@@ -18,14 +18,16 @@ model User {
 }
 
 model ApiKey {
-  id            Int            @id @default(autoincrement())
-  userId        Int
-  name          String
-  apiKey        String
-  disables      Boolean        @default(false)
-  deleted       Boolean        @default(false)
-  user          User           @relation(fields: [userId], references: [id])
-  conversations Conversation[]
+  id              Int            @id @default(autoincrement())
+  userId          Int
+  name            String
+  apiKey          String
+  disable         Boolean        @default(false)
+  deleted         Boolean        @default(false)
+  lastUsed        DateTime?
+  creditsConsumed Int            @default(0)
+  user            User           @relation(fields: [userId], references: [id])
+  conversations   Conversation[]
 }
 
 model Company {

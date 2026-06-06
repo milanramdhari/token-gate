@@ -13,8 +13,11 @@ export const auth = new Elysia({ prefix: "/auth" })
     "/signup",
     async ({ body, status, JWTNamespace, cookie: { auth } }) => {
       try {
-        const id = await AuthService.signUp(body.email, body.password);
-        const token = await JWTNamespace.sign({ userId: id });
+        const result = await AuthService.signUp(body.email, body.password);
+        if (!result.correctCredentials) {
+          return status(400, { message: "Invalid email or password" });
+        }
+        const token = await JWTNamespace.sign({ userId: result.userId });
         auth.set({
           value: token,
           httpOnly: true,
