@@ -1,11 +1,7 @@
-import { Elysia } from "elysia";
-import { auth } from "./modules/auth";
-import { app as apiKeys } from "./modules/apiKeys";
-import { app as models } from "./modules/models";
-import { app as payments } from "./modules/payments";
+import { app } from "../app";
 
-const app = new Elysia().use(auth).use(apiKeys).use(models).use(payments).listen(3000);
+const port = Number(process.env.PORT) || 3001;
 
-console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
-);
+app.listen(port);
+
+console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`);

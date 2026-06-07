@@ -11,6 +11,9 @@
     }
   },
   "private": true,
+  "scripts": {
+    "studio": "prisma studio"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/pg": "^8.20.0",
