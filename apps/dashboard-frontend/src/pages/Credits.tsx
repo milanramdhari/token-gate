@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { client } from "@/lib/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function Credits() {
+/**
+ * Public page component for purchasing credits.
+ *
+ * Allows the authenticated user to add credits via the onramp endpoint.
+ * Displays the updated credit balance after a successful purchase.
+ *
+ * @returns The rendered Credits page.
+ */
+export function Credits(): React.JSX.Element {
   const [credits, setCredits] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 

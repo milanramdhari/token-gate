@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Layout } from "@/components/Layout";
 import { client } from "@/lib/client";
@@ -10,7 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function Dashboard() {
+/**
+ * Public page component for the main dashboard overview.
+ *
+ * Fetches and displays a summary of the user's API key count and total credits
+ * consumed, with quick-action links to the API Keys and Credits pages.
+ *
+ * @returns The rendered Dashboard page.
+ */
+export function Dashboard(): React.JSX.Element {
   const [keyCount, setKeyCount] = useState<number | null>(null);
   const [creditsConsumed, setCreditsConsumed] = useState<number | null>(null);
 

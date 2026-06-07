@@ -1,5 +1,5 @@
 import { client } from "@/lib/client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function SignIn() {
+/**
+ * Public page component for signing in to an existing account.
+ *
+ * Renders an email/password form. On success the user is redirected to
+ * `/dashboard`; on failure an inline error message is shown.
+ *
+ * @returns The rendered Sign In page.
+ */
+export function SignIn(): React.JSX.Element {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

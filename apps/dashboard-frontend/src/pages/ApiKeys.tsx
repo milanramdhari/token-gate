@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { client } from "@/lib/client";
 import { Button } from "@/components/ui/button";
@@ -6,16 +6,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 
-type ApiKey = {
+interface ApiKey {
   id: string;
   apiKey: string;
   name: string;
   creditsConsumed: number;
   lastUsed: Date | null;
   disabled: boolean;
-};
+}
 
-export function ApiKeys() {
+/**
+ * Public page component for managing API keys.
+ *
+ * Displays all API keys for the authenticated user and allows creating,
+ * enabling/disabling, and deleting them. Newly created key values are shown
+ * once immediately after creation and not retrievable again.
+ *
+ * @returns The rendered API Keys management page.
+ */
+export function ApiKeys(): React.JSX.Element {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
