@@ -28,6 +28,13 @@ export namespace ApiKeyModel {
   export type updateApiKeyResponseSchema =
     typeof updateApiKeyResponseSchema.static;
 
+  export const unauthorizedResponseSchema = t.Object({
+    message: t.Literal("Unauthorized"),
+  });
+
+  export type unauthorizedResponseSchema =
+    typeof unauthorizedResponseSchema.static;
+
   export const disableApiKeyResponseFailedSchema = t.Object({
     message: t.Literal("Updating api key unsuccessful"),
   });

@@ -58,27 +58,33 @@ export abstract class ApiKeyService {
     apiKeyId: number,
     userId: number,
     disabled: boolean,
-  ) {
-    await prisma.apiKey.update({
+  ): Promise<boolean> {
+    const { count } = await prisma.apiKey.updateMany({
       where: {
         id: apiKeyId,
         userId,
+        deleted: false,
       },
       data: {
         disable: disabled,
       },
     });
+
+    return count > 0;
   }
 
-  static async delete(id: number, userId: number) {
-    await prisma.apiKey.update({
+  static async delete(id: number, userId: number): Promise<boolean> {
+    const { count } = await prisma.apiKey.updateMany({
       where: {
         id,
         userId,
+        deleted: false,
       },
       data: {
         deleted: true,
       },
     });
+
+    return count > 0;
   }
 }

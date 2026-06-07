@@ -17,12 +17,12 @@ export const app = new Elysia({ prefix: "api-keys" })
 
     const decoded = await jwt.verify(auth.value as string);
 
-    if (!decoded || !decoded.userId) {
+    if (!decoded) {
       return status(401);
     }
 
     return {
-      userId: decoded.userId as string,
+      userId: decoded.userId,
     };
   })
   .post(
@@ -60,26 +60,26 @@ export const app = new Elysia({ prefix: "api-keys" })
   )
   .put(
     "/",
-    ({ body, userId, status }) => {
-      try {
-        ApiKeyService.updateApiKeyDisabled(
-          Number(body.id),
-          Number(userId),
-          body.disabled,
-        );
-        return {
-          message: "Updated api key successfully",
-        };
-      } catch (e) {
-        return status(411, {
-          message: "Updating api key unsuccessful",
-        });
+    async ({ body, userId, status }) => {
+      const updated = await ApiKeyService.updateApiKeyDisabled(
+        Number(body.id),
+        Number(userId),
+        body.disabled,
+      );
+
+      if (!updated) {
+        return status(401, { message: "Unauthorized" });
       }
+
+      return {
+        message: "Updated api key successfully",
+      };
     },
     {
       body: ApiKeyModel.updateApiKeySchema,
       response: {
         200: ApiKeyModel.updateApiKeyResponseSchema,
+        401: ApiKeyModel.unauthorizedResponseSchema,
         411: ApiKeyModel.disableApiKeyResponseFailedSchema,
       },
     },
@@ -87,20 +87,20 @@ export const app = new Elysia({ prefix: "api-keys" })
   .delete(
     "/:id",
     async ({ params: { id }, userId, status }) => {
-      try {
-        await ApiKeyService.delete(Number(id), Number(userId));
-        return {
-          message: "Api key deleted successfully",
-        };
-      } catch (e) {
-        return status(411, {
-          message: "Api key deletetion failed",
-        });
+      const deleted = await ApiKeyService.delete(Number(id), Number(userId));
+
+      if (!deleted) {
+        return status(401, { message: "Unauthorized" });
       }
+
+      return {
+        message: "Api key deleted successfully",
+      };
     },
     {
       response: {
         200: ApiKeyModel.deleteApiKeyResponseSchema,
+        401: ApiKeyModel.unauthorizedResponseSchema,
         411: ApiKeyModel.deleteApiKeyResponseFailedSchema,
       },
     },
