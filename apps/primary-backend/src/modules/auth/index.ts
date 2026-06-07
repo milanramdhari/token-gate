@@ -42,19 +42,24 @@ export const auth = new Elysia({ prefix: "/auth" })
   .post(
     "/signin",
     async ({ body, status, JWTNamespace, cookie: { auth } }) => {
-      const result = await AuthService.signIn(body.email, body.password);
-      if (!result.correctCredentials) {
+      try {
+        const result = await AuthService.signIn(body.email, body.password);
+        if (!result.correctCredentials) {
+          return status(400, { message: "Invalid email or password" });
+        }
+        const token = await JWTNamespace.sign({ userId: result.userId });
+        auth.set({
+          value: token,
+          httpOnly: true,
+          secure: true,
+          maxAge: 86400,
+          sameSite: "strict",
+        });
+        return status(200, { token });
+      } catch (error) {
+        console.log(error);
         return status(400, { message: "Invalid email or password" });
       }
-      const token = await JWTNamespace.sign({ userId: result.userId });
-      auth.set({
-        value: token,
-        httpOnly: true,
-        secure: true,
-        maxAge: 86400,
-        sameSite: "strict",
-      });
-      return status(200, { token });
     },
     {
       body: AuthModel.signInSchema,

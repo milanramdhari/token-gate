@@ -4,20 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --hot src/index.ts",
+    "dev": "bun --hot --port 3000 src/index.ts",
     "start": "NODE_ENV=production bun src/index.ts",
     "build": "bun run build.ts"
   },
   "dependencies": {
+    "@elysia/eden": "^1.4.10",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
+    "app": "*",
     "bun-plugin-tailwind": "^0.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",
     "react": "^19",
     "react-dom": "^19",
+    "react-router": "^7.17.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

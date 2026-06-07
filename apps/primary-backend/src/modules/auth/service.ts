@@ -33,7 +33,13 @@ export abstract class AuthService {
       return { correctCredentials: false };
     }
 
-    if (!(await Bun.password.verify(password, user.password))) {
+    try {
+      const valid = await Bun.password.verify(password, user.password);
+      if (!valid) {
+        return { correctCredentials: false };
+      }
+    } catch {
+      // Stored password isn't a valid Bun hash (e.g. plain text from Prisma Studio)
       return { correctCredentials: false };
     }
 
