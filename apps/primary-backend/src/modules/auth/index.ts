@@ -21,9 +21,8 @@ export const auth = new Elysia({ prefix: "/auth" })
         auth.set({
           value: token,
           httpOnly: true,
-          secure: true,
           maxAge: 86400,
-          sameSite: "strict",
+          sameSite: "lax",
         });
         return status(200, { token });
       } catch (error) {
@@ -51,9 +50,8 @@ export const auth = new Elysia({ prefix: "/auth" })
         auth.set({
           value: token,
           httpOnly: true,
-          secure: true,
           maxAge: 86400,
-          sameSite: "strict",
+          sameSite: "lax",
         });
         return status(200, { token });
       } catch (error) {
