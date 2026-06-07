@@ -18,7 +18,11 @@ export const app = new Elysia({ prefix: "models" })
   .get(
     "/:id/providers",
     async ({ params: { id }, status }) => {
-      const providers = await ModelService.getModelProviders(Number(id));
+      const modelId = parseInt(id, 10);
+      if (!Number.isFinite(modelId)) {
+        return status(400, { message: "Invalid model id" as const });
+      }
+      const providers = await ModelService.getModelProviders(modelId);
       if (!providers) {
         return status(404, { message: "Model not found" as const });
       }
@@ -27,6 +31,7 @@ export const app = new Elysia({ prefix: "models" })
     {
       response: {
         200: ModelModel.getModelProvidersResponseSchema,
+        400: ModelModel.badRequestResponseSchema,
         404: ModelModel.notFoundResponseSchema,
       },
     },

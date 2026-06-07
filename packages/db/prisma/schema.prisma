@@ -40,7 +40,7 @@ model Company {
 model Model {
   id                    Int                    @id @default(autoincrement())
   name                  String
-  slug                  String
+  slug                  String                 @unique
   companyId             Int
   company               Company                @relation(fields: [companyId], references: [id])
   modelProviderMappings ModelProviderMapping[]

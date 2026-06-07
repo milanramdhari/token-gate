@@ -54,4 +54,10 @@ export namespace ModelModel {
   });
 
   export type notFoundResponseSchema = typeof notFoundResponseSchema.static;
+
+  export const badRequestResponseSchema = t.Object({
+    message: t.Literal("Invalid model id"),
+  });
+
+  export type badRequestResponseSchema = typeof badRequestResponseSchema.static;
 }

@@ -17,7 +17,7 @@ export const app = new Elysia({ prefix: "api-keys" })
 
     const decoded = await jwt.verify(auth.value as string);
 
-    if (!decoded) {
+    if (!decoded || !decoded.userId) {
       return status(401);
     }
 

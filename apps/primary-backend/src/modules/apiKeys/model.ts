@@ -48,7 +48,7 @@ export namespace ApiKeyModel {
         id: t.String(),
         apiKey: t.String(),
         name: t.String(),
-        credisConsumed: t.Number(),
+        creditsConsumed: t.Number(),
         lastUsed: t.Nullable(t.Date()),
         disabled: t.Boolean(),
       }),
@@ -65,7 +65,7 @@ export namespace ApiKeyModel {
     typeof deleteApiKeyResponseSchema.static;
 
   export const deleteApiKeyResponseFailedSchema = t.Object({
-    message: t.Literal("Api key deletetion failed"),
+    message: t.Literal("Api key deletion failed"),
   });
 
   export type deleteApiKeyResponseFailedSchema =

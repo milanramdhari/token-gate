@@ -21,27 +21,30 @@ export abstract class ModelService {
     });
     const companyById = new Map(companies.map((company) => [company.id, company]));
 
-    return models.map((model) => {
+    return models.flatMap((model) => {
       const company = companyById.get(model.companyId);
+      if (!company) return [];
       const modelMappings = mappingsByModelId.get(model.id) ?? [];
 
-      return {
-        id: model.id.toString(),
-        name: model.name,
-        slug: model.slug,
-        company: {
-          id: company!.id.toString(),
-          name: company!.name,
-          website: company!.website,
+      return [
+        {
+          id: model.id.toString(),
+          name: model.name,
+          slug: model.slug,
+          company: {
+            id: company.id.toString(),
+            name: company.name,
+            website: company.website,
+          },
+          providers: modelMappings.map((mapping) => ({
+            id: mapping.provider.id.toString(),
+            name: mapping.provider.name,
+            website: mapping.provider.website,
+            inputTokenCost: mapping.inputTokenCost,
+            outputTokenCost: mapping.outputTokenCost,
+          })),
         },
-        providers: modelMappings.map((mapping) => ({
-          id: mapping.provider.id.toString(),
-          name: mapping.provider.name,
-          website: mapping.provider.website,
-          inputTokenCost: mapping.inputTokenCost,
-          outputTokenCost: mapping.outputTokenCost,
-        })),
-      };
+      ];
     });
   }
 
@@ -89,13 +92,10 @@ export abstract class ModelService {
       id: provider.id.toString(),
       name: provider.name,
       website: provider.website,
-      models: provider.modelProviderMappings.map((mapping) => {
-        const model = modelById.get(mapping.modelId)!;
-        return {
-          id: model.id.toString(),
-          name: model.name,
-          slug: model.slug,
-        };
+      models: provider.modelProviderMappings.flatMap((mapping) => {
+        const model = modelById.get(mapping.modelId);
+        if (!model) return [];
+        return [{ id: model.id.toString(), name: model.name, slug: model.slug }];
       }),
     }));
   }
