@@ -5,14 +5,14 @@ type SignInResult =
   | { correctCredentials: true; userId: string };
 
 export abstract class AuthService {
-  static async signUp(email: string, password: string): Promise<string> {
+  static async signUp(email: string, password: string): Promise<SignInResult> {
     const existingUser = await prisma.user.findUnique({
       where: {
         email: email,
       },
     });
     if (existingUser) {
-      throw new Error("User already exists");
+      return { correctCredentials: false };
     }
 
     const user = await prisma.user.create({
@@ -21,7 +21,7 @@ export abstract class AuthService {
         password: await Bun.password.hash(password),
       },
     });
-    return user.id.toString();
+    return { correctCredentials: true, userId: user.id.toString() };
   }
 
   static async signIn(email: string, password: string): Promise<SignInResult> {
