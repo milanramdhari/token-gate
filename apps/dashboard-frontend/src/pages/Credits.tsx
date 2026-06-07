@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { client } from "@/lib/client";
 import { Button } from "@/components/ui/button";
@@ -11,28 +11,47 @@ import {
 } from "@/components/ui/card";
 
 /**
- * Public page component for purchasing credits.
+ * Public page component for managing credits.
  *
- * Allows the authenticated user to add credits via the onramp endpoint.
- * Displays the updated credit balance after a successful purchase.
+ * Shows the current credit balance and allows the authenticated user to
+ * purchase more credits via the onramp endpoint.
  *
  * @returns The rendered Credits page.
  */
 export function Credits(): React.JSX.Element {
-  const [credits, setCredits] = useState<number | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    client.payments.balance.get().then(({ data }) => {
+      if (data) setBalance(data.credits);
+    });
+  }, []);
 
   async function onramp() {
     setLoading(true);
     const { data } = await client.payments.onramp.post({});
     setLoading(false);
-    if (data) setCredits(data.credits);
+    if (data) setBalance(data.credits);
   }
 
   return (
     <Layout>
       <h1 className="text-2xl font-semibold mb-6">Credits</h1>
-      <div className="max-w-sm">
+      <div className="flex flex-col gap-4 max-w-sm">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Available Balance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              {balance ?? "—"}
+            </p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Add Credits</CardTitle>
@@ -40,13 +59,7 @@ export function Credits(): React.JSX.Element {
               Purchase credits to use with your API keys.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            {credits !== null && (
-              <p className="text-sm text-green-600 dark:text-green-400">
-                Credits added! New balance:{" "}
-                <strong>{credits}</strong>
-              </p>
-            )}
+          <CardContent>
             <Button
               onClick={() => void onramp()}
               disabled={loading}

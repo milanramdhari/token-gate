@@ -3,12 +3,7 @@ import { Link } from "react-router";
 import { Layout } from "@/components/Layout";
 import { client } from "@/lib/client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**
  * Public page component for the main dashboard overview.
@@ -36,6 +31,7 @@ export function Dashboard(): React.JSX.Element {
   return (
     <Layout>
       <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <Card>
           <CardHeader>
@@ -44,9 +40,7 @@ export function Dashboard(): React.JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {keyCount ?? "—"}
-            </p>
+            <p className="text-3xl font-bold">{keyCount ?? "—"}</p>
           </CardContent>
         </Card>
         <Card>
@@ -56,18 +50,20 @@ export function Dashboard(): React.JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {creditsConsumed ?? "—"}
-            </p>
+            <p className="text-3xl font-bold">{creditsConsumed ?? "—"}</p>
           </CardContent>
         </Card>
       </div>
+
       <div className="flex gap-3">
         <Button asChild>
           <Link to="/apikeys">Manage API Keys</Link>
         </Button>
         <Button variant="outline" asChild>
           <Link to="/credits">Add Credits</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link to="/models">Browse Models</Link>
         </Button>
       </div>
     </Layout>

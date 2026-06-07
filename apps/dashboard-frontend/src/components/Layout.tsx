@@ -4,7 +4,9 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { path: "/dashboard", label: "Dashboard" },
   { path: "/apikeys", label: "API Keys" },
+  { path: "/models", label: "Models" },
   { path: "/credits", label: "Credits" },
+  { path: "/profile", label: "Profile" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
