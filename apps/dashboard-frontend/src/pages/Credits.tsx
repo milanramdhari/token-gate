@@ -22,6 +22,7 @@ export function Credits(): React.JSX.Element {
   const [balance, setBalance] = useState<number | null>(null);
   const [balanceError, setBalanceError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -45,11 +46,17 @@ export function Credits(): React.JSX.Element {
 
   async function onramp() {
     setLoading(true);
+    setPurchaseError(null);
     try {
       const { data } = await client.payments.onramp.post({});
-      if (data) setBalance(data.credits);
-    } catch {
-      // onramp failed — balance unchanged
+      if (data) {
+        setBalance(data.credits);
+        setBalanceError(false);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Purchase failed";
+      console.error("[onramp]", err);
+      setPurchaseError(message);
     } finally {
       setLoading(false);
     }
@@ -81,7 +88,10 @@ export function Credits(): React.JSX.Element {
               Purchase credits to use with your API keys.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col gap-3">
+            {purchaseError && (
+              <p className="text-sm text-destructive">{purchaseError}</p>
+            )}
             <Button
               onClick={() => void onramp()}
               disabled={loading}
