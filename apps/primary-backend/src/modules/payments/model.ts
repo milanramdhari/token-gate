@@ -8,6 +8,11 @@ export namespace PaymentModel {
 
   export type onrampResponseSchema = typeof onrampResponseSchema.static;
 
+  export const balanceResponseSchema = t.Object({
+    credits: t.Number(),
+  });
+  export type balanceResponseSchema = typeof balanceResponseSchema.static;
+
   export const unauthorizedResponseSchema = t.Object({
     message: t.Literal("Unauthorized"),
   });

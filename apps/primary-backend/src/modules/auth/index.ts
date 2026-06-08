@@ -64,4 +64,36 @@ export const auth = new Elysia({ prefix: "/auth" })
         400: AuthModel.errorResponseSchema,
       },
     },
+  )
+  .get(
+    "/me",
+    async ({ JWTNamespace, cookie: { auth }, status }) => {
+      const decoded = await JWTNamespace.verify(auth.value as string);
+      if (!decoded || !decoded.userId) {
+        return status(401, { message: "Unauthorized" as const });
+      }
+      const email = await AuthService.getEmail(Number(decoded.userId));
+      if (!email) {
+        return status(401, { message: "Unauthorized" as const });
+      }
+      return { email };
+    },
+    {
+      response: {
+        200: AuthModel.meResponseSchema,
+        401: AuthModel.unauthorizedResponseSchema,
+      },
+    },
+  )
+  .post(
+    "/signout",
+    ({ cookie: { auth } }) => {
+      auth.remove();
+      return { message: "Signed out" as const };
+    },
+    {
+      response: {
+        200: AuthModel.signOutResponseSchema,
+      },
+    },
   );

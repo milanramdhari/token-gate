@@ -24,6 +24,14 @@ export abstract class AuthService {
     return { correctCredentials: true, userId: user.id.toString() };
   }
 
+  static async getEmail(userId: number): Promise<string | null> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    return user?.email ?? null;
+  }
+
   static async signIn(email: string, password: string): Promise<SignInResult> {
     const user = await prisma.user.findUnique({
       where: { email },

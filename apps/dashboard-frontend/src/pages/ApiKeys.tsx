@@ -32,6 +32,8 @@ export function ApiKeys(): React.JSX.Element {
   const [newKey, setNewKey] = useState<{ id: string; apiKey: string } | null>(
     null,
   );
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function fetchKeys() {
     const { data } = await client["api-keys"].get();
@@ -61,8 +63,15 @@ export function ApiKeys(): React.JSX.Element {
   }
 
   async function deleteKey(id: string) {
-    await client["api-keys"]({ id }).delete();
-    await fetchKeys();
+    setDeleteError(null);
+    try {
+      await client["api-keys"]({ id }).delete();
+      setConfirmDeleteId(null);
+      await fetchKeys();
+    } catch (err) {
+      console.error("[deleteKey]", err);
+      setDeleteError("Failed to delete key. Please try again.");
+    }
   }
 
   return (
@@ -151,13 +160,43 @@ export function ApiKeys(): React.JSX.Element {
                 >
                   {key.disabled ? "Enable" : "Disable"}
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => void deleteKey(key.id)}
-                >
-                  Delete
-                </Button>
+                {confirmDeleteId === key.id ? (
+                  <>
+                    {deleteError && (
+                      <span className="text-xs text-destructive">
+                        {deleteError}
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      Sure?
+                    </span>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => void deleteKey(key.id)}
+                    >
+                      Yes, delete
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setConfirmDeleteId(null);
+                        setDeleteError(null);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setConfirmDeleteId(key.id)}
+                  >
+                    Delete
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

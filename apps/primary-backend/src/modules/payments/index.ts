@@ -25,6 +25,19 @@ export const app = new Elysia({ prefix: "payments" })
       userId: decoded.userId,
     };
   })
+  .get(
+    "/balance",
+    async ({ userId }) => {
+      const { credits } = await PaymentService.getBalance(Number(userId));
+      return { credits };
+    },
+    {
+      response: {
+        200: PaymentModel.balanceResponseSchema,
+        401: PaymentModel.unauthorizedResponseSchema,
+      },
+    },
+  )
   .post(
     "/onramp",
     async ({ userId }) => {
