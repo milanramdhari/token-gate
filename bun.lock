@@ -15,11 +15,12 @@
     },
     "apps/api-backend": {
       "name": "api-backend",
-      "devDependencies": {
-        "@types/bun": "latest",
+      "version": "1.0.50",
+      "dependencies": {
+        "elysia": "latest",
       },
-      "peerDependencies": {
-        "typescript": "^5",
+      "devDependencies": {
+        "bun-types": "latest",
       },
     },
     "apps/dashboard-frontend": {
