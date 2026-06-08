@@ -28,24 +28,43 @@ export function Profile(): React.JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
-    client.auth.me.get().then(({ data }) => {
-      if (data) setEmail(data.email);
-    });
+    client.auth.me
+      .get()
+      .then(({ data }) => {
+        if (data) setEmail(data.email);
+      })
+      .catch((err: unknown) => {
+        console.error("Failed to load profile email", err);
+        setEmail(null);
+      });
 
-    client["api-keys"].get().then(({ data }) => {
-      if (data) {
-        setKeyCount(data.apiKeys.length);
-        setCreditsConsumed(
-          data.apiKeys.reduce((sum, k) => sum + k.creditsConsumed, 0),
-        );
-      }
-    });
+    client["api-keys"]
+      .get()
+      .then(({ data }) => {
+        if (data) {
+          setKeyCount(data.apiKeys.length);
+          setCreditsConsumed(
+            data.apiKeys.reduce((sum, k) => sum + k.creditsConsumed, 0),
+          );
+        }
+      })
+      .catch((err: unknown) => {
+        console.error("Failed to load API key stats", err);
+        setKeyCount(0);
+        setCreditsConsumed(0);
+      });
   }, []);
 
   async function signOut() {
     setSigningOut(true);
-    await client.auth.signout.post({});
-    void navigate("/landing");
+    try {
+      await client.auth.signout.post({});
+      void navigate("/");
+    } catch (err: unknown) {
+      console.error("Sign-out failed", err);
+    } finally {
+      setSigningOut(false);
+    }
   }
 
   return (

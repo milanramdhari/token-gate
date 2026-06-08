@@ -29,11 +29,23 @@ interface Model {
 export function Models(): React.JSX.Element {
   const [models, setModels] = useState<Model[]>([]);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    client.models.get().then(({ data }) => {
-      if (data) setModels(data.models);
-    });
+    setIsLoading(true);
+    client.models
+      .get()
+      .then(({ data }) => {
+        if (data) {
+          setModels(data.models);
+          setError(null);
+        } else {
+          setError("Failed to load models");
+        }
+      })
+      .catch(() => setError("Failed to load models"))
+      .finally(() => setIsLoading(false));
   }, []);
 
   function toggleModel(id: string) {
@@ -46,7 +58,11 @@ export function Models(): React.JSX.Element {
     <Layout>
       <h1 className="text-2xl font-semibold mb-6">Models</h1>
 
-      {models.length === 0 ? (
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : error ? (
+        <p className="text-sm text-destructive">{error}</p>
+      ) : models.length === 0 ? (
         <p className="text-sm text-muted-foreground">No models available.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

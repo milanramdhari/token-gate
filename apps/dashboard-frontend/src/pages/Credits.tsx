@@ -20,19 +20,39 @@ import {
  */
 export function Credits(): React.JSX.Element {
   const [balance, setBalance] = useState<number | null>(null);
+  const [balanceError, setBalanceError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    client.payments.balance.get().then(({ data }) => {
-      if (data) setBalance(data.credits);
-    });
+    let isMounted = true;
+
+    client.payments.balance
+      .get()
+      .then(({ data }) => {
+        if (isMounted) {
+          if (data) setBalance(data.credits);
+          else setBalanceError(true);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setBalanceError(true);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   async function onramp() {
     setLoading(true);
-    const { data } = await client.payments.onramp.post({});
-    setLoading(false);
-    if (data) setBalance(data.credits);
+    try {
+      const { data } = await client.payments.onramp.post({});
+      if (data) setBalance(data.credits);
+    } catch {
+      // onramp failed — balance unchanged
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -46,9 +66,11 @@ export function Credits(): React.JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {balance ?? "—"}
-            </p>
+            {balanceError ? (
+              <p className="text-sm text-destructive">Could not load balance</p>
+            ) : (
+              <p className="text-3xl font-bold">{balance ?? "—"}</p>
+            )}
           </CardContent>
         </Card>
 
