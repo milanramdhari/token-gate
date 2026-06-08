@@ -1,12 +1,11 @@
 import "./index.css";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router";
 import { SignIn } from "./pages/Signin";
 import { SignUp } from "./pages/Signup";
 import { Dashboard } from "./pages/Dashboard";
 import { Credits } from "./pages/Credits";
 import { ApiKeys } from "./pages/ApiKeys";
 import { Landing } from "./pages/Landing";
-import { Profile } from "./pages/Profile";
 import { Models } from "./pages/Models";
 
 export function App() {
@@ -19,7 +18,6 @@ export function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/credits" element={<Credits />} />
         <Route path="/apikeys" element={<ApiKeys />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/models" element={<Models />} />
       </Routes>
     </BrowserRouter>

@@ -33,6 +33,7 @@ export function ApiKeys(): React.JSX.Element {
     null,
   );
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function fetchKeys() {
     const { data } = await client["api-keys"].get();
@@ -62,9 +63,15 @@ export function ApiKeys(): React.JSX.Element {
   }
 
   async function deleteKey(id: string) {
-    await client["api-keys"]({ id }).delete();
-    setConfirmDeleteId(null);
-    await fetchKeys();
+    setDeleteError(null);
+    try {
+      await client["api-keys"]({ id }).delete();
+      setConfirmDeleteId(null);
+      await fetchKeys();
+    } catch (err) {
+      console.error("[deleteKey]", err);
+      setDeleteError("Failed to delete key. Please try again.");
+    }
   }
 
   return (
@@ -155,6 +162,11 @@ export function ApiKeys(): React.JSX.Element {
                 </Button>
                 {confirmDeleteId === key.id ? (
                   <>
+                    {deleteError && (
+                      <span className="text-xs text-destructive">
+                        {deleteError}
+                      </span>
+                    )}
                     <span className="text-xs text-muted-foreground">
                       Sure?
                     </span>
@@ -168,7 +180,10 @@ export function ApiKeys(): React.JSX.Element {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setConfirmDeleteId(null)}
+                      onClick={() => {
+                        setConfirmDeleteId(null);
+                        setDeleteError(null);
+                      }}
                     >
                       Cancel
                     </Button>

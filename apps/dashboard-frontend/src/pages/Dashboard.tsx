@@ -18,16 +18,25 @@ export function Dashboard(): React.JSX.Element {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [modelCount, setModelCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      client["api-keys"].get().then(({ data }) => {
-        if (data) setApiKeys(data.apiKeys);
-      }),
-      client.models.get().then(({ data }) => {
-        if (data) setModelCount(data.models.length);
-      }),
-    ]).finally(() => setIsLoading(false));
+    async function load() {
+      try {
+        const [keysRes, modelsRes] = await Promise.all([
+          client["api-keys"].get(),
+          client.models.get(),
+        ]);
+        if (keysRes.data) setApiKeys(keysRes.data.apiKeys);
+        if (modelsRes.data) setModelCount(modelsRes.data.models.length);
+      } catch (err) {
+        console.error("[Dashboard] failed to load data", err);
+        setError("Failed to load dashboard data. Please refresh.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    void load();
   }, []);
 
   const activeKeys = apiKeys.filter((k) => !k.disabled).length;
@@ -39,6 +48,10 @@ export function Dashboard(): React.JSX.Element {
   return (
     <Layout>
       <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
+
+      {error && (
+        <p className="text-sm text-destructive mb-4">{error}</p>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Card>
