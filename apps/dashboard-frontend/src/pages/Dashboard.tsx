@@ -62,7 +62,7 @@ export function Dashboard(): React.JSX.Element {
             <KeyRound className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{isLoading ? "—" : activeKeys}</p>
+            <p className="text-3xl font-bold">{isLoading ? "—" :activeKeys}</p>
             <p className="text-xs text-muted-foreground mt-1">
               {isLoading ? "" : `${apiKeys.length} total`}
             </p>
@@ -78,7 +78,7 @@ export function Dashboard(): React.JSX.Element {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
-              {isLoading ? "—" : totalCreditsUsed}
+              {isLoading ? "—" :totalCreditsUsed}
             </p>
             <p className="text-xs text-muted-foreground mt-1">across all keys</p>
           </CardContent>
@@ -93,7 +93,7 @@ export function Dashboard(): React.JSX.Element {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
-              {isLoading ? "—" : (modelCount ?? 0)}
+              {isLoading ? "—" :(modelCount ?? 0)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               from all providers

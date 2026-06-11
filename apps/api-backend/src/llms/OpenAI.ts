@@ -8,25 +8,23 @@ const client = new OpenAI({
 
 export class OpenAi extends BaseLlm {
   static async chat(model: string, messages: Messages): Promise<LlmResponse> {
-    const response = await client.responses.create({
+    const response = await client.chat.completions.create({
       model: model,
-      input: messages.map((message) => ({
+      messages: messages.map((message) => ({
         role: message.role,
         content: message.content,
       })),
     });
 
     return {
-      inputTokensConsumed: response.usage?.input_tokens!,
-      outputTokensConsumed: response.usage?.output_tokens!,
+      inputTokensConsumed: response.usage?.prompt_tokens ?? 0,
+      outputTokensConsumed: response.usage?.completion_tokens ?? 0,
       completions: {
-        choices: [
-          {
-            message: {
-              content: response.output_text,
-            },
+        choices: response.choices.map((choice) => ({
+          message: {
+            content: choice.message.content ?? "",
           },
-        ],
+        })),
       },
     };
   }
