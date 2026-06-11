@@ -5,6 +5,18 @@ import { client } from "@/lib/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { KeyRound, Coins, Layers, Plus, ArrowRight } from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface ApiKey {
   id: string;
@@ -14,21 +26,45 @@ interface ApiKey {
   disabled: boolean;
 }
 
+interface Analytics {
+  requestsPerDay: { date: string; count: number }[];
+  tokensPerDay: { date: string; input: number; output: number }[];
+  creditsByKey: { name: string; creditsConsumed: number }[];
+}
+
+function formatDay(value: unknown): string {
+  // Coerce to a string first: the value may arrive as a string, number, or Date
+  // depending on serialization. Then parse just the YYYY-MM-DD portion.
+  // Noon avoids any timezone-driven off-by-one on the weekday.
+  const s = value instanceof Date ? value.toISOString() : String(value ?? "");
+  const d = new Date(`${s.slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(d.getTime())) {
+    const fallback = new Date(s);
+    return Number.isNaN(fallback.getTime())
+      ? s
+      : fallback.toLocaleDateString("en-US", { weekday: "short" });
+  }
+  return d.toLocaleDateString("en-US", { weekday: "short" });
+}
+
 export function Dashboard(): React.JSX.Element {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [modelCount, setModelCount] = useState<number | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
       try {
-        const [keysRes, modelsRes] = await Promise.all([
+        const [keysRes, modelsRes, analyticsRes] = await Promise.all([
           client["api-keys"].get(),
           client.models.get(),
+          client.analytics.get(),
         ]);
         if (keysRes.data) setApiKeys(keysRes.data.apiKeys);
         if (modelsRes.data) setModelCount(modelsRes.data.models.length);
+        if (analyticsRes.data) setAnalytics(analyticsRes.data);
       } catch (err) {
         console.error("[Dashboard] failed to load data", err);
         setError("Failed to load dashboard data. Please refresh.");
@@ -44,6 +80,21 @@ export function Dashboard(): React.JSX.Element {
     (sum, k) => sum + k.creditsConsumed,
     0,
   );
+
+  const requestsData = (analytics?.requestsPerDay ?? []).map((row) => ({
+    day: formatDay(row.date),
+    count: row.count,
+  }));
+  const tokensData = (analytics?.tokensPerDay ?? []).map((row) => ({
+    day: formatDay(row.date),
+    input: row.input,
+    output: row.output,
+  }));
+  const creditsData = analytics?.creditsByKey ?? [];
+  const hasChartData =
+    requestsData.length > 0 ||
+    tokensData.length > 0 ||
+    creditsData.length > 0;
 
   return (
     <Layout>
@@ -101,6 +152,128 @@ export function Dashboard(): React.JSX.Element {
           </CardContent>
         </Card>
       </div>
+
+      {!isLoading && hasChartData && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Requests (last 7 days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={requestsData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-muted"
+                    vertical={false}
+                  />
+                  <XAxis dataKey="day" fontSize={12} tickLine={false} />
+                  <YAxis allowDecimals={false} fontSize={12} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: "rgba(120,120,120,0.1)" }}
+                    contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  />
+                  <Bar
+                    dataKey="count"
+                    name="Requests"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Tokens (last 7 days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={240}>
+                <AreaChart data={tokensData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-muted"
+                    vertical={false}
+                  />
+                  <XAxis dataKey="day" fontSize={12} tickLine={false} />
+                  <YAxis fontSize={12} tickLine={false} width={48} />
+                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Area
+                    type="monotone"
+                    dataKey="input"
+                    name="Input"
+                    stackId="tokens"
+                    stroke="#6366f1"
+                    fill="#6366f1"
+                    fillOpacity={0.3}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="output"
+                    name="Output"
+                    stackId="tokens"
+                    stroke="#10b981"
+                    fill="#10b981"
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Credits by API key
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart
+                  data={creditsData}
+                  layout="vertical"
+                  margin={{ left: 16 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-muted"
+                    horizontal={false}
+                  />
+                  <XAxis
+                    type="number"
+                    allowDecimals={false}
+                    fontSize={12}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    fontSize={12}
+                    tickLine={false}
+                    width={100}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "rgba(120,120,120,0.1)" }}
+                    contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  />
+                  <Bar
+                    dataKey="creditsConsumed"
+                    name="Credits"
+                    fill="#f59e0b"
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <Card>

@@ -82,6 +82,7 @@ model Conversation {
   output                 String
   inputTokenCount        Int
   outputTokenCount       Int
+  createdAt              DateTime             @default(now())
   user                   User                 @relation(fields: [userId], references: [id])
   apiKey                 ApiKey               @relation(fields: [apiKeyId], references: [id])
   modelProviderMapping   ModelProviderMapping @relation(fields: [modelProviderMappingId], references: [id])
