@@ -1,12 +1,10 @@
 import { t } from "elysia";
 
 export namespace PaymentModel {
-  export const onrampResponseSchema = t.Object({
-    message: t.Literal("Credits added successfully"),
-    credits: t.Number(),
+  export const checkoutResponseSchema = t.Object({
+    url: t.String(),
   });
-
-  export type onrampResponseSchema = typeof onrampResponseSchema.static;
+  export type checkoutResponseSchema = typeof checkoutResponseSchema.static;
 
   export const balanceResponseSchema = t.Object({
     credits: t.Number(),
@@ -16,7 +14,11 @@ export namespace PaymentModel {
   export const unauthorizedResponseSchema = t.Object({
     message: t.Literal("Unauthorized"),
   });
-
   export type unauthorizedResponseSchema =
     typeof unauthorizedResponseSchema.static;
+
+  export const webhookResponseSchema = t.Object({
+    received: t.Boolean(),
+  });
+  export type webhookResponseSchema = typeof webhookResponseSchema.static;
 }
