@@ -89,6 +89,8 @@ const app = new Elysia()
           return status(400, { message: "No provider handler for this model" });
         }
 
+        // inputTokenCost / outputTokenCost are stored as integers in units of
+        // 0.1 credits per token. Dividing by 10 converts to whole credits.
         const creditsUsed = Math.ceil(
           (response.inputTokensConsumed * providerMapping.inputTokenCost +
             response.outputTokensConsumed * providerMapping.outputTokenCost) /
@@ -98,19 +100,27 @@ const app = new Elysia()
         const outputText =
           response.completions.choices[0]?.message.content ?? "";
 
-        await prisma.$transaction([
-          prisma.user.update({
-            where: { id: apiKeyDb.user.id },
+        await prisma.$transaction(async (tx) => {
+          // Conditional decrement: only updates when credits >= creditsUsed.
+          // count === 0 means a concurrent request already consumed the balance.
+          const { count } = await tx.user.updateMany({
+            where: { id: apiKeyDb.user.id, credits: { gte: creditsUsed } },
             data: { credits: { decrement: creditsUsed } },
-          }),
-          prisma.apiKey.update({
+          });
+
+          if (count === 0) {
+            throw new Error("INSUFFICIENT_CREDITS");
+          }
+
+          await tx.apiKey.update({
             where: { apiKey },
             data: {
               creditsConsumed: { increment: creditsUsed },
               lastUsed: new Date(),
             },
-          }),
-          prisma.conversation.create({
+          });
+
+          await tx.conversation.create({
             data: {
               userId: apiKeyDb.user.id,
               apiKeyId: apiKeyDb.id,
@@ -120,11 +130,14 @@ const app = new Elysia()
               inputTokenCount: response.inputTokensConsumed,
               outputTokenCount: response.outputTokensConsumed,
             },
-          }),
-        ]);
+          });
+        });
 
         return response;
       } catch (err) {
+        if (err instanceof Error && err.message === "INSUFFICIENT_CREDITS") {
+          return status(402, { message: "Insufficient credits" });
+        }
         console.error("[chat/completions]", err);
         return status(500, { message: "Internal server error" });
       }

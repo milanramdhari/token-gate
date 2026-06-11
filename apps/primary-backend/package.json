@@ -12,7 +12,8 @@
     "@elysiajs/cors": "^1.4.2",
     "@elysiajs/jwt": "^1.4.2",
     "db": "*",
-    "elysia": "latest"
+    "elysia": "latest",
+    "stripe": "^22.2.0"
   },
   "devDependencies": {
     "bun-types": "latest"

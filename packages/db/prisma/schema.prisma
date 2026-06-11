@@ -65,11 +65,12 @@ model ModelProviderMapping {
 }
 
 model OnrampTransaction {
-  id     Int    @id @default(autoincrement())
-  userId Int
-  amount Int
-  status String
-  user   User   @relation(fields: [userId], references: [id])
+  id              Int    @id @default(autoincrement())
+  userId          Int
+  amount          Int
+  status          String
+  stripeSessionId String? @unique
+  user            User   @relation(fields: [userId], references: [id])
 }
 
 model Conversation {
