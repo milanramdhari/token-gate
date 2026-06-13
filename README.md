@@ -106,5 +106,4 @@ bun run dev
 ## Planned
 
 - Webhook notifications on low credit balance.
-- Key expiry dates and IP allowlist support.
 - Per-model cost breakdown in analytics.
